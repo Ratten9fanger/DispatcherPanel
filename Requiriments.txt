@@ -1,0 +1,1 @@
+EntityFrameworkCore 9.0.5
