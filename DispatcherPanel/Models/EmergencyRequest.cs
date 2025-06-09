@@ -6,6 +6,10 @@ namespace DispatcherPanel.Models
     {
         public Guid Id { get; set; }
 
+        public string Category { get; set; }
+
+        public int Level { get; set; }
+
         [Required]
         public string FullName { get; set; }
 

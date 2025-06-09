@@ -1,30 +1,35 @@
 ﻿@page
-@{
-    Layout = null;
-}
+@using DispatcherPanel.Pages
+@model IndexModel
 
 <!DOCTYPE html>
 <html lang="ru">
 <head>
     <meta charset="utf-8" />
     <title>Панель диспетчера</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+    <script src="https://api-maps.yandex.ru/v3/?apikey=f2728f4c-6d3e-47a5-b4ca-c482b0984fda&lang=ru_RU"></script>
+   
+
     <style>
-        /* Базовые стили */
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Roboto', sans-serif;
             margin: 0;
             padding: 20px;
             transition: background-color 0.3s, color 0.3s;
         }
 
         .container {
-            max-width: 1200px;
+            width: 90%;
+            max-width: 1600px;
             margin: 0 auto;
+            min-height: 90vh;
         }
 
         h1 {
             text-align: center;
             margin-bottom: 20px;
+            font-size: 1.8em;
         }
 
         .theme-toggle {
@@ -34,63 +39,175 @@
         }
 
             .theme-toggle button {
-                padding: 10px 20px;
+                background-color: #1e90ff;
                 border: none;
-                background-color: #007bff;
                 color: white;
-                border-radius: 4px;
-                cursor: pointer;
+                padding: 10px 20px;
                 font-size: 16px;
+                border-radius: 6px;
+                cursor: pointer;
             }
 
-        .panels {
+        .main-layout {
             display: flex;
             gap: 20px;
-            flex-wrap: wrap;
+            height: calc(90vh - 150px);
         }
 
-        .panel {
-            flex: 1;
-            min-width: 300px;
-            background-color: #f9f9f9; /* Молочный цвет по умолчанию */
+        .panel-left {
+            width: 30%;
+            background-color: #f9f9f9;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
             padding: 20px;
-            transition: background-color 0.3s, color 0.3s;
+            overflow-y: auto;
         }
 
-        .card {
-            background-color: #ffffff;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 10px;
-            box-shadow: 0 1px 4px rgba(0,0,0,0.1);
+        .scrollable-container {
+            max-height: 80vh;
+            overflow-y: auto;
         }
 
-        .card-title {
-            font-weight: bold;
-            margin-bottom: 5px;
+        .panel-right {
+            width: 70%;
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
         }
 
         .map-container {
-            height: 400px;
+            flex-grow: 1;
+            height: 100%;
             border-radius: 12px;
             overflow: hidden;
         }
 
-        /* Тема "Темная" */
+        .panel-bottom {
+            background-color: #f9f9f9;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            padding: 20px;
+            margin-top: 20px;
+        }
+
+        .card {
+            position: relative;
+            background-color: #ffffff;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .card-level-1 {
+            background-color: #e74c3c; /* Красно-гранатовый */
+        }
+
+        .card-level-2 {
+            background-color: #f1c40f; /* Лимонно-жёлтый */
+        }
+
+        .card-level-3 {
+            background-color: #ffffff; /* Обычный белый */
+        }
+
+        .card-title {
+            font-size: 1.1em;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #2d3436;
+        }
+
+        .btn-process {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            background-color: #2ed573;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+            .btn-process:hover {
+                background-color: #2fcb6e;
+            }
+
+        .category-icon {
+            display: block;
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
+            opacity: 0.2; /* Полупрозрачность */
+            z-index: -1; /* Позади текста */
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center right; /* Центрируем по вертикали и выравниваем по правому краю */
+        }
+
+        .icon-fire {
+            background-image: url("/images/fire.png");
+        }
+
+        .icon-emergency {
+            background-image: url("/images/emergency.png");
+        }
+
+        .icon-police {
+            background-image: url("/images/police.png");
+        }
+
+        .icon-ambulance {
+            background-image: url("/images/ambulance.png");
+        }
+
+        .icon-gas {
+            background-image: url("/images/gas.png");
+        }
+
+        .icon-ecology {
+            background-image: url("/images/ecology.png");
+        }
+
         body.dark-theme {
             background-color: #121212;
             color: #f5f5f5;
         }
 
-            body.dark-theme .panel {
+            body.dark-theme .panel-left,
+            body.dark-theme .panel-right,
+            body.dark-theme .panel-bottom {
                 background-color: #1e1e1e;
             }
 
             body.dark-theme .card {
                 background-color: #2c2c2c;
                 color: #f5f5f5;
+            }
+
+            body.dark-theme .card-level-1 {
+                background-color: #b73227; /* Тёмно-красный */
+            }
+
+            body.dark-theme .card-level-2 {
+                background-color: #d4ac0d; /* Тёмно-жёлтый */
+            }
+
+            body.dark-theme .card-level-3 {
+                background-color: #2c2c2c; /* Тёмно-серый */
+            }
+
+            body.dark-theme .category-icon {
+                opacity: 0.3; /* Увеличиваем прозрачность для тёмной темы */
             }
     </style>
 </head>
@@ -103,96 +220,97 @@
 
         <h1>Панель диспетчера</h1>
 
-        <div class="panels">
+        <div class="main-layout">
 
-            <!-- Панель: Входящие заявки -->
-            <div class="panel">
+            <!-- Левая панель: Входящие заявки -->
+            <div class="panel-left">
                 <h2>Входящие заявки</h2>
 
-                <!-- Заглушка: тестовые заявки (заменить на Model.ActiveRequests) -->
-                @{
-                    // TODO: Удалить после подключения модели
-                    var activeRequests = new[]
+                <div class="scrollable-container">
+                    @foreach (var req in Model.ActiveRequests)
                     {
-                new { FullName = "Иван Петров", PhoneNumber = "+7 912 345-67-89", Address = "ул. Ленина, д. 10" },
-                new { FullName = "Мария Смирнова", PhoneNumber = "+7 921 123-45-67", Address = "пр. Космонавтов, д. 15" },
-                new { FullName = "Алексей Иванов", PhoneNumber = "+7 900 987-65-43", Address = "ул. Гоголя, д. 5" }
-                };
-                }
+                        <div class="card @(req.Level == 1 ? "card-level-1" : req.Level == 2 ? "card-level-2" : "")">
+                            <div class="category-icon @(req.Category == "Пожар" ? "icon-fire" :
+                                 req.Category == "МЧС" ? "icon-emergency" :
+                                 req.Category == "Полиция" ? "icon-police" :
+                                 req.Category == "Скорая помощь" ? "icon-ambulance" :
+                                 req.Category == "Газовая служба" ? "icon-gas" :
+                                 req.Category == "Экология" ? "icon-ecology" : "")"></div>
+                            <div class="card-title">@req.FullName</div>
+                            <div>Телефон: @req.PhoneNumber</div>
+                            <div>Описание: @req.Description</div>
 
-                @foreach (var req in activeRequests)
-                {
-                    <div class="card">
-                        <div class="card-title">@req.FullName</div>
-                        <div>@req.PhoneNumber</div>
-                        <div>@req.Address</div>
-                        <button class="btn btn-success">Отметить как обработано</button>
-                    </div>
-                }
+                            <form method="post" asp-page="/Index" asp-page-handler="MarkAsProcessed">
+                                <input type="hidden" name="id" value="@req.Id" />
+                                <button class="btn-process">✅ Отметить как обработано</button>
+                            </form>
+                        </div>
+                    }
+                </div>
             </div>
 
-            <!-- Панель: Обработанные заявки -->
-            <div class="panel">
-                <h2>Обработанные заявки</h2>
-
-                <!-- Заглушка: тестовые данные (заменить на Model.ProcessedRequests) -->
-                @{
-                    // TODO: Удалить после подключения модели
-                    var processedRequests = new[]
-                    {
-                new { FullName = "Сергей Николаев", PhoneNumber = "+7 916 111-22-33", Address = "ул. Пушкина, д. 20" },
-                new { FullName = "Екатерина Орлова", PhoneNumber = "+7 926 444-55-66", Address = "ул. Тверская, д. 5" }
-                };
-                }
-
-                @foreach (var req in processedRequests)
-                {
-                    <div class="card">
-                        <div class="card-title">@req.FullName</div>
-                        <div>@req.PhoneNumber</div>
-                        <div>@req.Address</div>
-                    </div>
-                }
-            </div>
-
-            <!-- Панель: Карта -->
-            <div class="panel map-container">
+            <!-- Правая панель: Карта -->
+            <div class="panel-right">
                 <h2>Карта</h2>
-                <div id="map" style="width: 100%; height: 100%;"></div>
+                <div id="map" style="width: 600px; height: 400px"></div>
             </div>
+        </div>
+
+        <!-- Нижняя панель: Обработанные заявки -->
+        <div class="panel-bottom">
+            <h2>Обработанные заявки</h2>
+
+            @foreach (var req in Model.ProcessedRequests)
+            {
+                <div class="card">
+                    <div class="card-title">@req.FullName</div>
+                    <div>Телефон: @req.PhoneNumber</div>
+                </div>
+            }
         </div>
     </div>
 
-    <!-- Google Maps API -->
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY&callback=initMap" async defer></script>
     <script>
-        let map;
+        window.onload = async function () {
+            try {
+                await ymaps3.ready;
 
-        function initMap() {
-            const center = { lat: 55.751, lng: 37.619 }; // Москва по умолчанию
-            map = new google.maps.Map(document.getElementById("map"), {
-                zoom: 10,
-                center: center
-            });
+                const { YMap, YMapDefaultSchemeLayer } = await ymaps3.import('yandex/ymaps3-types', 'yandex/ymaps3-controls@0.0.1');
 
-            // Тестовые метки для активных заявок
-            // TODO: удалить и использовать данные из Model.ActiveRequests
-
-            const testMarkers = [
-                { name: "Иван Петров", lat: 55.751, lng: 37.619 },
-                { name: "Мария Смирнова", lat: 55.755, lng: 37.625 },
-                { name: "Алексей Иванов", lat: 55.760, lng: 37.630 }
-            ];
-
-            testMarkers.forEach(marker => {
-                new google.maps.Marker({
-                    position: { lat: marker.lat, lng: marker.lng },
-                    map: map,
-                    title: marker.name
+                const map = new YMap(document.getElementById('map'), {
+                    location: {
+                        center: [37.62, 55.75], // Москва
+                        zoom: 10
+                    }
                 });
-            });
-        }
 
+                map.addChild(new YMapDefaultSchemeLayer());
+
+                console.log("Карта загружена");
+
+                @foreach (var req in Model.ActiveRequests)
+                {
+                    <text>
+                                    const marker = new YMapMarker({
+                                        coordinates: [@req.Longitude, @req.Latitude]
+                                            }, {
+                                        content: new ymaps3.YMapDefaultMarker({title: "@req.FullName" })
+                                            });
+                                    map.addChild(marker);
+                    </text>
+                }
+
+                    } catch (error) {
+                console.error("Ошибка при загрузке Яндекс.Карт:", error);
+            }
+        };
+    </script>
+
+    <script type="text/javascript">
+
+
+
+        
         function toggleTheme() {
             document.body.classList.toggle('dark-theme');
         }
