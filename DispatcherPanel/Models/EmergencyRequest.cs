@@ -16,8 +16,8 @@ namespace DispatcherPanel.Models
         [Required]
         public string PhoneNumber { get; set; }
 
-        public double Latitude { get; set; }
-        public double Longitude { get; set; }
+        public decimal Latitude { get; set; }
+        public decimal Longitude { get; set; }
 
         [Required]
         public string Description { get; set; }

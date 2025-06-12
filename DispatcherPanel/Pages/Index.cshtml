@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <title>Панель диспетчера</title>
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
-    <script src="https://api-maps.yandex.ru/v3/?apikey=f2728f4c-6d3e-47a5-b4ca-c482b0984fda&lang=ru_RU"></script>
+    <script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=d2bd06e7-9e46-4f3d-818f-df48c4f78531" type="text/javascript"></script>
    
 
     <style>
@@ -214,6 +214,7 @@
 
 <body class="light-theme">
     <div class="container">
+
         <div class="theme-toggle">
             <button onclick="toggleTheme()">Переключить тему</button>
         </div>
@@ -252,8 +253,9 @@
             <!-- Правая панель: Карта -->
             <div class="panel-right">
                 <h2>Карта</h2>
-                <div id="map" style="width: 600px; height: 400px"></div>
+                <div id="myMap" style="width: 100%; height: 100%"></div>
             </div>
+
         </div>
 
         <!-- Нижняя панель: Обработанные заявки -->
@@ -268,48 +270,61 @@
                 </div>
             }
         </div>
+
+
     </div>
 
+
+
     <script>
-        window.onload = async function () {
-            try {
-                await ymaps3.ready;
+        ymaps.ready(init)
 
-                const { YMap, YMapDefaultSchemeLayer } = await ymaps3.import('yandex/ymaps3-types', 'yandex/ymaps3-controls@0.0.1');
+        function init() {
+            var myMap = new ymaps.Map('myMap', { center: [53.64393, 55.944785], zoom: 10, controls:[] });
 
-                const map = new YMap(document.getElementById('map'), {
-                    location: {
-                        center: [37.62, 55.75], // Москва
-                        zoom: 10
+            // Добавляем стандартные элементы управления
+            myMap.controls.add('zoomControl');
+            myMap.controls.add('typeSelector');
+            myMap.controls.add('fullscreenControl');
+
+            @foreach (var req in Model.ActiveRequests)
+            {
+                    Console.WriteLine(@req.Latitude.ToString("F6"), @req.Longitude.ToString("F6"))
+            ;
+                    string preset = "islands#redIcon"; // По умолчанию красная метка
+
+                    if (req.Level == 1)
+                    {
+                        preset = "islands#redIcon";
                     }
-                });
+                    else if (req.Level == 2)
+                    {
+                        preset = "islands#yellowIcon";
+                    }
+                    else if (req.Level == 3)
+                    {
+                        preset = "islands#whiteIcon";
+                    }
 
-                map.addChild(new YMapDefaultSchemeLayer());
+                <text>
+                        var placemark = new ymaps.Placemark([parseFloat('@req.Latitude.ToString("F6").Replace(",", ".")'), parseFloat('@req.Longitude.ToString("F6").Replace(",", ".")')],
+                        {
+                            balloonContent: '<strong>@req.FullName</strong><br>@req.Description'
+                        },
+                        {
+                            preset: '@preset',
+                            iconContent: '@req.Category'
+                        });
 
-                console.log("Карта загружена");
+                        myMap.geoObjects.add(placemark);
 
-                @foreach (var req in Model.ActiveRequests)
-                {
-                    <text>
-                                    const marker = new YMapMarker({
-                                        coordinates: [@req.Longitude, @req.Latitude]
-                                            }, {
-                                        content: new ymaps3.YMapDefaultMarker({title: "@req.FullName" })
-                                            });
-                                    map.addChild(marker);
-                    </text>
-                }
-
-                    } catch (error) {
-                console.error("Ошибка при загрузке Яндекс.Карт:", error);
+                        console.log([@req.Latitude.ToString("F6"), @req.Longitude.ToString("F6")]);
+                </text>
             }
-        };
+        }
     </script>
 
     <script type="text/javascript">
-
-
-
         
         function toggleTheme() {
             document.body.classList.toggle('dark-theme');
